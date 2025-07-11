@@ -3,19 +3,9 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+require_once __DIR__ . '/../db.php';
 
-$dataFile = __DIR__ . '/data.json';
-
-function getCursos($dataFile) {
-    if (!file_exists($dataFile)) return [];
-    $json = file_get_contents($dataFile);
-    return json_decode($json, true) ?: [];
-}
-
-function saveCursos($dataFile, $cursos) {
-    file_put_contents($dataFile, json_encode($cursos, JSON_PRETTY_PRINT));
-}
-
+$pdo = getDbConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'OPTIONS') {
@@ -25,35 +15,25 @@ if ($method === 'OPTIONS') {
 
 switch ($method) {
     case 'GET':
-        echo json_encode(getCursos($dataFile));
+        $stmt = $pdo->query('SELECT * FROM cursos ORDER BY id');
+        echo json_encode($stmt->fetchAll());
         break;
     case 'POST':
         $input = json_decode(file_get_contents('php://input'), true);
-        $cursos = getCursos($dataFile);
-        $input['id'] = count($cursos) ? max(array_column($cursos, 'id')) + 1 : 1;
-        $cursos[] = $input;
-        saveCursos($dataFile, $cursos);
-        echo json_encode($input);
+        $stmt = $pdo->prepare('INSERT INTO cursos (image, title, description) VALUES (?, ?, ?) RETURNING *');
+        $stmt->execute([$input['image'], $input['title'], $input['description']]);
+        echo json_encode($stmt->fetch());
         break;
     case 'PUT':
         $input = json_decode(file_get_contents('php://input'), true);
-        $cursos = getCursos($dataFile);
-        foreach ($cursos as &$curso) {
-            if ($curso['id'] == $input['id']) {
-                $curso = array_merge($curso, $input);
-                break;
-            }
-        }
-        saveCursos($dataFile, $cursos);
-        echo json_encode($input);
+        $stmt = $pdo->prepare('UPDATE cursos SET image=?, title=?, description=? WHERE id=? RETURNING *');
+        $stmt->execute([$input['image'], $input['title'], $input['description'], $input['id']]);
+        echo json_encode($stmt->fetch());
         break;
     case 'DELETE':
         $input = json_decode(file_get_contents('php://input'), true);
-        $cursos = getCursos($dataFile);
-        $cursos = array_filter($cursos, function($curso) use ($input) {
-            return $curso['id'] != $input['id'];
-        });
-        saveCursos($dataFile, array_values($cursos));
+        $stmt = $pdo->prepare('DELETE FROM cursos WHERE id=?');
+        $stmt->execute([$input['id']]);
         echo json_encode(["success" => true]);
         break;
     default:

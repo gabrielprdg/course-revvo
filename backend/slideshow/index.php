@@ -3,19 +3,9 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+require_once __DIR__ . '/../db.php';
 
-$dataFile = __DIR__ . '/data.json';
-
-function getSlides($dataFile) {
-    if (!file_exists($dataFile)) return [];
-    $json = file_get_contents($dataFile);
-    return json_decode($json, true) ?: [];
-}
-
-function saveSlides($dataFile, $slides) {
-    file_put_contents($dataFile, json_encode($slides, JSON_PRETTY_PRINT));
-}
-
+$pdo = getDbConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'OPTIONS') {
@@ -25,35 +15,25 @@ if ($method === 'OPTIONS') {
 
 switch ($method) {
     case 'GET':
-        echo json_encode(getSlides($dataFile));
+        $stmt = $pdo->query('SELECT * FROM slideshow ORDER BY id');
+        echo json_encode($stmt->fetchAll());
         break;
     case 'POST':
         $input = json_decode(file_get_contents('php://input'), true);
-        $slides = getSlides($dataFile);
-        $input['id'] = count($slides) ? max(array_column($slides, 'id')) + 1 : 1;
-        $slides[] = $input;
-        saveSlides($dataFile, $slides);
-        echo json_encode($input);
+        $stmt = $pdo->prepare('INSERT INTO slideshow (image, title, description, button_label, button_link) VALUES (?, ?, ?, ?, ?) RETURNING *');
+        $stmt->execute([$input['image'], $input['title'], $input['description'], $input['button']['label'], $input['button']['link']]);
+        echo json_encode($stmt->fetch());
         break;
     case 'PUT':
         $input = json_decode(file_get_contents('php://input'), true);
-        $slides = getSlides($dataFile);
-        foreach ($slides as &$slide) {
-            if ($slide['id'] == $input['id']) {
-                $slide = array_merge($slide, $input);
-                break;
-            }
-        }
-        saveSlides($dataFile, $slides);
-        echo json_encode($input);
+        $stmt = $pdo->prepare('UPDATE slideshow SET image=?, title=?, description=?, button_label=?, button_link=? WHERE id=? RETURNING *');
+        $stmt->execute([$input['image'], $input['title'], $input['description'], $input['button']['label'], $input['button']['link'], $input['id']]);
+        echo json_encode($stmt->fetch());
         break;
     case 'DELETE':
         $input = json_decode(file_get_contents('php://input'), true);
-        $slides = getSlides($dataFile);
-        $slides = array_filter($slides, function($slide) use ($input) {
-            return $slide['id'] != $input['id'];
-        });
-        saveSlides($dataFile, array_values($slides));
+        $stmt = $pdo->prepare('DELETE FROM slideshow WHERE id=?');
+        $stmt->execute([$input['id']]);
         echo json_encode(["success" => true]);
         break;
     default:

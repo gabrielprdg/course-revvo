@@ -3,32 +3,55 @@
   align-items: center;
   justify-content: space-between;
   background: #fff;
-  padding: 1rem 2rem;
+  padding: 0.7rem 2rem 0.7rem 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   position: sticky;
   top: 0;
   z-index: 10;
+  min-height: 56px;
 }
 
 .header__logo {
+  font-family: 'Montserrat', Arial, sans-serif;
   font-size: 2rem;
-  font-weight: bold;
-  color: #2a2a2a;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #222;
+  margin-right: 2rem;
 }
 
 .header__right {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.2rem;
+}
+
+.header__search-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  min-width: 220px;
 }
 
 .header__search {
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  border: 1px solid #ddd;
+  width: 100%;
+  padding: 0.5rem 2.2rem 0.5rem 1rem;
+  border-radius: 24px;
+  border: 1px solid #e0e0e0;
   font-size: 1rem;
+  background: #f5f5f5;
   outline: none;
-  min-width: 180px;
+  transition: border 0.2s;
+}
+.header__search:focus {
+  border: 1.5px solid #aaa;
+}
+.header__search-icon {
+  position: absolute;
+  right: 1rem;
+  font-size: 1.1rem;
+  color: #aaa;
+  pointer-events: none;
 }
 
 .header__user {
@@ -36,32 +59,48 @@
   align-items: center;
   gap: 0.7rem;
 }
-
-.header__welcome {
-  font-size: 1rem;
-  color: #444;
-}
-
 .header__avatar {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 2px solid #eee;
+  object-fit: cover;
+}
+.header__welcome {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.93rem;
+  color: #444;
+  margin-left: 0.5rem;
+}
+.header__welcome strong {
+  font-size: 1.05rem;
+  color: #222;
+  font-weight: 600;
+}
+.header__dropdown {
+  font-size: 1.1rem;
+  color: #aaa;
+  margin-left: 0.3rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     padding: 1rem;
-    gap: 0.7rem;
+    gap: 1rem;
   }
   .header__right {
-    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
     gap: 0.7rem;
   }
-  .header__search {
-    min-width: 100px;
-    width: 100%;
+  .header__search-container {
+    min-width: 0;
+    margin: 0.5rem 0;
+  }
+  .header__user {
+    justify-content: flex-end;
   }
 } 

@@ -15,7 +15,7 @@ function App() {
         <h2 className="section-title">Meus cursos</h2>
         <CoursesSection />
       </main>
-    </div>
+      </div>
   );
 }
 
