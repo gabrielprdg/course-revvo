@@ -11,8 +11,8 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql
-      - ./init_data.sql:/docker-entrypoint-initdb.d/02-data.sql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./sql/init_data.sql:/docker-entrypoint-initdb.d/02-data.sql
   php:
     build: .
     container_name: revvo-php
