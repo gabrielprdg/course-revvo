@@ -1,14 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import ReactModal from "react-modal";
 import "./CoursesSection.scss";
 import CourseCard from "./CourseCard";
 
-function CoursesSection() {
+ReactModal.setAppElement("#root");
+
+const CoursesSection = forwardRef((props, ref) => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ title: "", description: "", image: "" });
   const [editing, setEditing] = useState(null);
   const [feedback, setFeedback] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    openModal: () => {
+      setEditing(null);
+      setForm({ title: "", description: "", image: "" });
+      setModalOpen(true);
+    }
+  }));
 
   const fetchCourses = () => {
     setLoading(true);
@@ -55,6 +67,7 @@ function CoursesSection() {
         setEditing(null);
         setFeedback("Curso salvo com sucesso!");
         fetchCourses();
+        setModalOpen(false);
       })
       .catch(() => setFeedback("Erro ao salvar curso"));
   };
@@ -62,6 +75,7 @@ function CoursesSection() {
   const handleEdit = (course) => {
     setForm({ title: course.title, description: course.description, image: course.image });
     setEditing(course.id);
+    setModalOpen(true);
   };
 
   const handleDelete = (id) => {
@@ -83,50 +97,77 @@ function CoursesSection() {
       .catch(() => setFeedback("Erro ao remover curso"));
   };
 
+  const handleOpenModal = () => {
+    setEditing(null);
+    setForm({ title: "", description: "", image: "" });
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setEditing(null);
+    setForm({ title: "", description: "", image: "" });
+    setModalOpen(false);
+  };
+
   if (loading) return <div>Carregando cursos...</div>;
   if (error) return <div style={{color: 'red'}}>Erro: {error}</div>;
 
   return (
-    <div>
-      <form className="course-form" onSubmit={handleSubmit}>
-        <input
-          name="title"
-          placeholder="Título do curso"
-          value={form.title}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="description"
-          placeholder="Descrição"
-          value={form.description}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="image"
-          placeholder="URL da imagem"
-          value={form.image}
-          onChange={handleChange}
-          required
-        />
-        <button type="submit">{editing ? "Salvar edição" : "Adicionar curso"}</button>
-        {editing && <button type="button" onClick={() => { setEditing(null); setForm({ title: "", description: "", image: "" }); }}>Cancelar</button>}
-      </form>
-      {feedback && <div className="feedback">{feedback}</div>}
+    <div className="courses-section">
+      <ReactModal
+        isOpen={modalOpen}
+        onRequestClose={handleCloseModal}
+        contentLabel={editing ? "Editar curso" : "Adicionar novo curso"}
+        className="modal react-modal"
+        overlayClassName="modal-backdrop react-modal-backdrop"
+        shouldCloseOnOverlayClick={true}
+      >
+        <h2>{editing ? "Editar curso" : "Adicionar novo curso"}</h2>
+        <form className="course-form" onSubmit={handleSubmit}>
+          <input
+            name="title"
+            placeholder="Título do curso"
+            value={form.title}
+            onChange={handleChange}
+            required
+            autoFocus
+          />
+          <input
+            name="description"
+            placeholder="Descrição"
+            value={form.description}
+            onChange={handleChange}
+            required
+          />
+          <input
+            name="image"
+            placeholder="URL da imagem"
+            value={form.image}
+            onChange={handleChange}
+            required
+          />
+          <button type="submit">{editing ? "Salvar edição" : "Adicionar curso"}</button>
+          <button type="button" onClick={handleCloseModal}>Cancelar</button>
+        </form>
+        {feedback && <div className="feedback">{feedback}</div>}
+      </ReactModal>
       <div className="courses-grid">
-        {courses.map((course) => (
-          <div key={course.id} style={{ position: "relative" }}>
-            <CourseCard course={course} />
-            <div className="crud-actions">
-              <button onClick={() => handleEdit(course)}>Editar</button>
-              <button onClick={() => handleDelete(course.id)} className="danger">Remover</button>
+        {courses.length === 0 ? (
+          <div className="empty-message">Nenhum curso cadastrado ainda.</div>
+        ) : (
+          courses.map((course) => (
+            <div key={course.id} style={{ position: "relative" }}>
+              <CourseCard course={course} />
+              <div className="crud-actions">
+                <button onClick={() => handleEdit(course)}>Editar</button>
+                <button onClick={() => handleDelete(course.id)} className="danger">Remover</button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
-}
+});
 
 export default CoursesSection; 

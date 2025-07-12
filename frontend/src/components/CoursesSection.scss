@@ -4,6 +4,68 @@
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
+
+// Botão flutuante de adicionar curso
+.add-course-btn {
+  position: fixed;
+  bottom: 2.5rem;
+  right: 2.5rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #2a7ae4;
+  color: #fff;
+  font-size: 2.2rem;
+  border: none;
+  box-shadow: 0 4px 16px rgba(42, 122, 228, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1001;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.add-course-btn:hover, .add-course-btn:focus {
+  background: #1558b0;
+  box-shadow: 0 6px 24px rgba(42, 122, 228, 0.22);
+}
+
+// Modal de curso (reaproveita estilos do FirstVisitModal)
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  padding: 2rem 1.5rem;
+  max-width: 90vw;
+  width: 350px;
+  text-align: center;
+}
+.modal h2 {
+  margin-bottom: 1rem;
+}
+.modal button[type="button"] {
+  background: #aaa;
+  margin-left: 0.5rem;
+}
+
+// Mensagem de vazio
+.empty-message {
+  text-align: center;
+  color: #888;
+  font-size: 1.15rem;
+  margin: 2.5rem 0 2rem 0;
+  width: 100%;
+}
+
 .course-form {
   display: flex;
   gap: 0.7rem;
@@ -67,4 +129,43 @@
 }
 .crud-actions .danger:hover {
   background: #c0392b;
+}
+
+.add-course-inline-btn {
+  background: #2a7ae4;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: 0.5rem;
+}
+.add-course-inline-btn:hover, .add-course-inline-btn:focus {
+  background: #1558b0;
+} 
+
+.react-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  padding: 2rem 1.5rem;
+  max-width: 90vw;
+  width: 350px;
+  text-align: center;
+  position: relative;
+  margin: auto;
+  outline: none;
+}
+
+.react-modal-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 } 
