@@ -1,4 +1,4 @@
-import React, { useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import ReactModal from "react-modal";
 import "./CoursesSection.scss";
 import CourseCard from "./CourseCard";
@@ -6,6 +6,7 @@ import CourseCard from "./CourseCard";
 ReactModal.setAppElement("#root");
 
 const CoursesSection = forwardRef((props, ref) => {
+  const { search } = props;
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -40,8 +41,20 @@ const CoursesSection = forwardRef((props, ref) => {
   };
 
   useEffect(() => {
-    fetchCourses();
-  }, []);
+    setLoading(true);
+    const timeout = setTimeout(() => {
+      fetch(`http://localhost:8000/cursos/?search=${encodeURIComponent(search)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setCourses(data);
+          setLoading(false);
+        });
+    }, 300);
+    return () => {
+      clearTimeout(timeout);
+      setLoading(false); // Garante que o input não trave
+    };
+  }, [search]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -114,6 +127,7 @@ const CoursesSection = forwardRef((props, ref) => {
 
   return (
     <div className="courses-section">
+      {/* Campo de busca removido, pois agora é global */}
       <ReactModal
         isOpen={modalOpen}
         onRequestClose={handleCloseModal}
@@ -151,21 +165,19 @@ const CoursesSection = forwardRef((props, ref) => {
         </form>
         {feedback && <div className="feedback">{feedback}</div>}
       </ReactModal>
-      <div className="courses-grid">
-        {courses.length === 0 ? (
-          <div className="empty-message">Nenhum curso cadastrado ainda.</div>
-        ) : (
-          courses.map((course) => (
-            <div key={course.id} style={{ position: "relative" }}>
-              <CourseCard course={course} />
-              <div className="crud-actions">
-                <button onClick={() => handleEdit(course)}>Editar</button>
-                <button onClick={() => handleDelete(course.id)} className="danger">Remover</button>
-              </div>
+      {courses.length === 0 ? (
+        <div className="empty-message">Nenhum curso cadastrado ainda.</div>
+      ) : (
+        courses.map((course) => (
+          <div key={course.id} style={{ position: "relative" }} className="course-card">
+            <CourseCard course={course} />
+            <div className="crud-actions">
+              <button onClick={() => handleEdit(course)}>Editar</button>
+              <button onClick={() => handleDelete(course.id)} className="danger">Remover</button>
             </div>
-          ))
-        )}
-      </div>
+          </div>
+        ))
+      )}
     </div>
   );
 });

@@ -1,10 +1,9 @@
 <?php
-require_once __DIR__ . '/../../src/db.php';
-
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Content-Type: application/json; charset=UTF-8");
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+require_once dirname(__DIR__, 2) . '/src/db.php';
 
 $pdo = getDbConnection();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -16,7 +15,13 @@ if ($method === 'OPTIONS') {
 
 switch ($method) {
     case 'GET':
-        $stmt = $pdo->query('SELECT * FROM cursos ORDER BY id');
+        $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        if ($search !== '') {
+            $stmt = $pdo->prepare('SELECT * FROM cursos WHERE title ILIKE :search OR description ILIKE :search ORDER BY id');
+            $stmt->execute(['search' => "%$search%"]);
+        } else {
+            $stmt = $pdo->query('SELECT * FROM cursos ORDER BY id');
+        }
         echo json_encode($stmt->fetchAll());
         break;
     case 'POST':
